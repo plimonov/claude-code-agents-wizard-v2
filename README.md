@@ -4,19 +4,19 @@ A simple yet powerful orchestration system for Claude Code that uses specialized
 
 ## 🎯 What Is This?
 
-This is a **custom Claude Code agent system** that transforms how you build software projects. Instead of one AI doing everything, you get four specialized agents working together:
+This is a **custom Claude Code orchestration system** that transforms how you build software projects. Claude Code itself acts as the orchestrator with its 200k context window, managing the big picture while delegating individual tasks to specialized subagents:
 
-- **🧠 Orchestrator** - The strategic brain that sees the big picture and manages todo lists
-- **✍️ Coder** - The implementation specialist that writes clean, working code
-- **👁️ Tester** - The visual QA that verifies everything using Playwright screenshots
-- **🆘 Stuck** - The human escalation point that ensures you stay in control
+- **🧠 Claude (You)** - The orchestrator with 200k context managing todos and the big picture
+- **✍️ Coder Subagent** - Implements one todo at a time in its own clean context
+- **👁️ Tester Subagent** - Verifies implementations using Playwright in its own context
+- **🆘 Stuck Subagent** - Human escalation point when ANY problem occurs
 
 ## ⚡ Key Features
 
 - **No Fallbacks**: When ANY agent hits a problem, you get asked - no assumptions, no workarounds
 - **Visual Testing**: Playwright MCP integration for screenshot-based verification
 - **Todo Tracking**: Always see exactly where your project stands
-- **Simple Flow**: orchestrator → coder → tester → repeat until done
+- **Simple Flow**: Claude creates todos → delegates to coder → tester verifies → repeat
 - **Human Control**: The stuck agent ensures you're always in the loop
 
 ## 🚀 Quick Start
@@ -50,77 +50,91 @@ You: "Build a todo app with React and TypeScript"
 ```
 
 Claude will automatically:
-1. Invoke the **orchestrator** agent
-2. The orchestrator creates a detailed todo list
-3. Tasks get delegated to **coder** → **tester** in sequence
-4. If ANY problem occurs, the **stuck** agent asks you what to do
-5. Project continues until complete
+1. Create a detailed todo list using TodoWrite
+2. Delegate the first todo to the **coder** subagent
+3. The coder implements in its own clean context window
+4. Delegate verification to the **tester** subagent (Playwright screenshots)
+5. If ANY problem occurs, the **stuck** subagent asks you what to do
+6. Mark todo complete and move to the next one
+7. Repeat until project complete
 
 ### The Workflow
 
 ```
 USER: "Build X"
     ↓
-ORCHESTRATOR: Creates detailed todos
+CLAUDE: Creates detailed todos with TodoWrite
     ↓
-ORCHESTRATOR: Delegates to coder
+CLAUDE: Invokes coder subagent for todo #1
     ↓
-CODER: Implements feature
+CODER (own context): Implements feature
     ↓
-    ├─→ Problem? → STUCK AGENT → You decide → Continue
+    ├─→ Problem? → Invokes STUCK → You decide → Continue
     ↓
-TESTER: Visual testing with Playwright screenshots
+CODER: Reports completion
     ↓
-    ├─→ Test fails? → STUCK AGENT → You decide → Continue
+CLAUDE: Invokes tester subagent
     ↓
-ORCHESTRATOR: Marks complete, moves to next todo
+TESTER (own context): Playwright screenshots & verification
+    ↓
+    ├─→ Test fails? → Invokes STUCK → You decide → Continue
+    ↓
+TESTER: Reports success
+    ↓
+CLAUDE: Marks todo complete, moves to next
     ↓
 Repeat until all todos done ✅
 ```
 
-## 🛠️ Agent Details
+## 🛠️ How It Works
 
-### Orchestrator Agent
-**Purpose**: Strategic planning and delegation
+### Claude (The Orchestrator)
+**Your 200k Context Window**
 
-- Creates comprehensive todo lists
+- Creates and maintains comprehensive todo lists
 - Sees the complete project from A-Z
-- Delegates tasks to specialized agents
-- Tracks overall progress
+- Delegates individual todos to specialized subagents
+- Tracks overall progress across all tasks
+- Maintains project state and context
 
-**When it's used**: Automatically at the start of any multi-step project
+**How it works**: Claude IS the orchestrator - it uses its 200k context to manage everything
 
-### Coder Agent
-**Purpose**: Implementation specialist
+### Coder Subagent
+**Fresh Context Per Task**
 
+- Gets invoked with ONE specific todo item
+- Works in its own clean context window
 - Writes clean, functional code
-- Implements specific features/tasks
-- **Never uses fallbacks** - escalates problems immediately
-- Returns detailed implementation reports
+- **Never uses fallbacks** - invokes stuck agent immediately
+- Reports completion back to Claude
 
-**When it's used**: When a coding task needs implementation
+**When it's used**: Claude delegates each coding todo to this subagent
 
-### Tester Agent
-**Purpose**: Visual quality assurance
+### Tester Subagent
+**Fresh Context Per Verification**
 
+- Gets invoked after each coder completion
+- Works in its own clean context window
 - Uses **Playwright MCP** to see rendered output
 - Takes screenshots to verify layouts
 - Tests interactions (clicks, forms, navigation)
-- Validates at multiple screen sizes
 - **Never marks failing tests as passing**
+- Reports pass/fail back to Claude
 
-**When it's used**: Immediately after coder completes implementation
+**When it's used**: Claude delegates testing after every implementation
 
-### Stuck Agent
-**Purpose**: Mandatory human escalation
+### Stuck Subagent
+**Fresh Context Per Problem**
 
-- **ONLY agent** that can ask you questions
-- Invoked by ALL other agents when problems occur
+- Gets invoked when coder or tester hits a problem
+- Works in its own clean context window
+- **ONLY subagent** that can ask you questions
 - Presents clear options for you to choose
 - Blocks progress until you respond
+- Returns your decision to the calling agent
 - Ensures no blind fallbacks or workarounds
 
-**When it's used**: Whenever ANY agent encounters ANY problem
+**When it's used**: Whenever ANY subagent encounters ANY problem
 
 ## 🚨 The "No Fallbacks" Rule
 
@@ -136,32 +150,34 @@ Every agent is **hardwired** to invoke the stuck agent rather than use fallbacks
 ```
 You: "Build a landing page with a contact form"
 
-Orchestrator creates todos:
-  1. Set up HTML structure
-  2. Create hero section
-  3. Add contact form with validation
-  4. Style with CSS
-  5. Test form submission
+Claude creates todos:
+  [ ] Set up HTML structure
+  [ ] Create hero section
+  [ ] Add contact form with validation
+  [ ] Style with CSS
+  [ ] Test form submission
 
-→ Delegates to Coder for task #1
+Claude invokes coder(todo #1: "Set up HTML structure")
 
-Coder: Creates index.html
-→ Reports completion
+Coder (own context): Creates index.html
+Coder: Reports completion to Claude
 
-→ Orchestrator delegates to Tester
+Claude invokes tester("Verify HTML structure loads")
 
-Tester: Uses Playwright to navigate to page
+Tester (own context): Uses Playwright to navigate
 Tester: Takes screenshot
 Tester: Verifies HTML structure visible
-→ Reports success
+Tester: Reports success to Claude
 
-→ Orchestrator moves to task #2
+Claude: Marks todo #1 complete ✓
 
-Coder: Implements hero section
+Claude invokes coder(todo #2: "Create hero section")
+
+Coder (own context): Implements hero section
 Coder: ERROR - image file not found
-→ Invokes Stuck Agent
+Coder: Invokes stuck subagent
 
-Stuck Agent asks YOU:
+Stuck (own context): Asks YOU:
   "Hero image 'hero.jpg' not found. How to proceed?"
   Options:
   - Use placeholder image
@@ -170,8 +186,11 @@ Stuck Agent asks YOU:
 
 You choose: "Download from Unsplash"
 
-→ Coder proceeds with your decision
-... and so on
+Stuck: Returns your decision to coder
+Coder: Proceeds with Unsplash download
+Coder: Reports completion to Claude
+
+... and so on until all todos done
 ```
 
 ## 📁 Repository Structure
@@ -179,12 +198,11 @@ You choose: "Download from Unsplash"
 ```
 .
 ├── .claude/
-│   ├── CLAUDE.md              # Main orchestration logic
+│   ├── CLAUDE.md              # Orchestration instructions for main Claude
 │   └── agents/
-│       ├── orchestrator.md    # Strategic planning agent
-│       ├── coder.md          # Implementation agent
-│       ├── tester.md         # Visual testing agent
-│       └── stuck.md          # Human escalation agent
+│       ├── coder.md          # Coder subagent definition
+│       ├── tester.md         # Tester subagent definition
+│       └── stuck.md          # Stuck subagent definition
 ├── .mcp.json                  # Playwright MCP configuration
 ├── .gitignore
 └── README.md
@@ -217,31 +235,34 @@ This is an open system! Feel free to:
 
 This system leverages Claude Code's [subagent system](https://docs.claude.com/en/docs/claude-code/sub-agents):
 
-1. **Agents are defined** in `.claude/agents/*.md` files
-2. **Main logic** is in `.claude/CLAUDE.md`
-3. **Playwright MCP** is configured in `.mcp.json`
-4. **Claude Code automatically loads** these when you run `claude` in this directory
+1. **CLAUDE.md** instructs main Claude to be the orchestrator
+2. **Subagents** are defined in `.claude/agents/*.md` files
+3. **Each subagent** gets its own fresh context window
+4. **Main Claude** maintains the 200k context with todos and project state
+5. **Playwright MCP** is configured in `.mcp.json` for visual testing
 
-The magic happens because each agent has:
-- **Specific tools** they can access
-- **Clear responsibilities** defined in their prompts
-- **Hardwired rules** about when to escalate
-- **No ability** to use AskUserQuestion except the stuck agent
+The magic happens because:
+- **Claude (200k context)** = Maintains big picture, manages todos
+- **Coder (fresh context)** = Implements one task at a time
+- **Tester (fresh context)** = Verifies one implementation at a time
+- **Stuck (fresh context)** = Handles one problem at a time with human input
+- **Each subagent** has specific tools and hardwired escalation rules
 
 ## 🎯 Best Practices
 
-1. **Trust the orchestrator** - Let it create the todo list
-2. **Review screenshots** - The tester provides visual proof
+1. **Trust Claude** - Let it create and manage the todo list
+2. **Review screenshots** - The tester provides visual proof of every implementation
 3. **Make decisions when asked** - The stuck agent needs your guidance
-4. **Don't interrupt the flow** - Let agents complete their cycles
-5. **Check the todo list** - Always visible with `/todos` command
+4. **Don't interrupt the flow** - Let subagents complete their work
+5. **Check the todo list** - Always visible, tracks real progress
 
 ## 🔥 Pro Tips
 
-- Use `/agents` command to see all available agents
-- The orchestrator maintains a todo list you can check anytime
-- Screenshots from the tester are saved and can be reviewed
-- Each agent has access to different tools - check their `.md` files to see capabilities
+- Use `/agents` command to see all available subagents
+- Claude maintains the todo list in its 200k context - check anytime
+- Screenshots from tester are saved and can be reviewed
+- Each subagent has specific tools - check their `.md` files
+- Subagents get fresh contexts - no context pollution!
 
 ## 📜 License
 
