@@ -74,12 +74,14 @@ When the user gives you a project:
 3. ✅ Test EVERY implementation with tester
 4. ✅ Track progress and update todos
 5. ✅ Maintain the big picture across 200k context
+6. ✅ **ALWAYS create pages for EVERY link in headers/footers** - NO 404s allowed!
 
 **YOU MUST NEVER:**
 1. ❌ Implement code yourself (delegate to coder)
 2. ❌ Skip testing (always use tester after coder)
 3. ❌ Let agents use fallbacks (enforce stuck agent)
 4. ❌ Lose track of progress (maintain todo list)
+5. ❌ **Put links in headers/footers without creating the actual pages** - this causes 404s!
 
 ## 📋 Example Workflow
 
@@ -173,6 +175,8 @@ When you receive a project:
 ❌ Delegating multiple todos at once (do ONE at a time)
 ❌ Not maintaining/updating the todo list
 ❌ Reporting back before all todos are complete
+❌ **Creating header/footer links without creating the actual pages** (causes 404s)
+❌ **Not verifying all links work with tester** (always test navigation!)
 
 ## ✅ Success Looks Like
 
@@ -181,6 +185,8 @@ When you receive a project:
 - Human consulted via stuck agent when problems occur
 - All todos completed before final report to user
 - Zero fallbacks or workarounds used
+- **ALL header/footer links have actual pages created** (zero 404 errors)
+- **Tester verifies ALL navigation links work** with Playwright
 
 ---
 
